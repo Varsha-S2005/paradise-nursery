@@ -5,13 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Shopping Cart - Paradise Nursery</title>
     <link rel="stylesheet" href="css/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body>
     <header>
         <nav>
-            <a href="index.html">Home</a>
-            <a href="products.html">Products</a>
-            <a href="cart.html">Cart (0)</a> <!-- This will dynamically update later -->
+            <a href="index.html"><i class="fas fa-home"></i> Home</a>
+            <a href="products.html"><i class="fas fa-seedling"></i> Shop</a>
+            <a href="cart.html"><i class="fas fa-shopping-cart"></i> Cart (1)</a> <!-- Dynamically updated -->
         </nav>
     </header>
 
@@ -20,32 +21,80 @@
         <div class="cart-items">
             <!-- Cart Item Example -->
             <div class="cart-item">
-                <img src="images/product1.png" alt="Plant 1">
-                <h2>Plant Name 1</h2>
-                <p>$10.00</p>
+                <img src="images/product1.png" alt="Sunflower">
+                <h2>Sunflower</h2>
+                <p>Price: $10.00</p>
                 <div class="quantity">
-                    <button>−</button>
-                    <span>1</span>
-                    <button>+</button>
+                    <button class="decrement">−</button>
+                    <span class="quantity-value">1</span>
+                    <button class="increment">+</button>
                 </div>
                 <p>Total: $10.00</p>
-                <button>Remove</button>
+                <button class="remove">Remove</button>
             </div>
 
-            <!-- More cart items will go here -->
+            <!-- Add more cart items dynamically -->
         </div>
+
         <div class="cart-summary">
-            <p>Total Number of Items: 1</p>
-            <p>Total Cost: $10.00</p>
-            <button>Continue Shopping</button>
-            <button>Checkout</button>
+            <p>Total Number of Items: <span id="total-items">1</span></p>
+            <p>Total Cost: $<span id="total-cost">10.00</span></p>
+            <button class="continue-shopping" onclick="window.location.href='products.html'">Continue Shopping</button>
+            <button class="checkout" onclick="checkout()">Checkout</button>
         </div>
     </main>
 
     <footer>
         <p>&copy; 2025 Paradise Nursery</p>
     </footer>
-    <script src="js/cart.js"></script>
+
+    <script>
+        // Quantity control logic
+        document.querySelectorAll('.cart-item').forEach(item => {
+            const decrementButton = item.querySelector('.decrement');
+            const incrementButton = item.querySelector('.increment');
+            const quantityValue = item.querySelector('.quantity-value');
+            const totalElement = item.querySelector('p:nth-of-type(2)'); // Total price for this item
+            const removeButton = item.querySelector('.remove');
+
+            const pricePerItem = 10; // Set the price per item dynamically or fetch it
+            const totalItemsElement = document.getElementById('total-items');
+            const totalCostElement = document.getElementById('total-cost');
+
+            function updateCartSummary() {
+                const totalItems = Array.from(document.querySelectorAll('.cart-item .quantity-value'))
+                    .map(qty => parseInt(qty.textContent))
+                    .reduce((acc, curr) => acc + curr, 0);
+                const totalCost = totalItems * pricePerItem;
+                totalItemsElement.textContent = totalItems;
+                totalCostElement.textContent = totalCost.toFixed(2);
+            }
+
+            incrementButton.addEventListener('click', () => {
+                const currentQty = parseInt(quantityValue.textContent);
+                quantityValue.textContent = currentQty + 1;
+                totalElement.textContent = `Total: $${((currentQty + 1) * pricePerItem).toFixed(2)}`;
+                updateCartSummary();
+            });
+
+            decrementButton.addEventListener('click', () => {
+                const currentQty = parseInt(quantityValue.textContent);
+                if (currentQty > 1) {
+                    quantityValue.textContent = currentQty - 1;
+                    totalElement.textContent = `Total: $${((currentQty - 1) * pricePerItem).toFixed(2)}`;
+                    updateCartSummary();
+                }
+            });
+
+            removeButton.addEventListener('click', () => {
+                item.remove();
+                updateCartSummary();
+            });
+        });
+
+        function checkout() {
+            alert('Proceeding to checkout!');
+        }
+    </script>
 </body>
 </html>
-
