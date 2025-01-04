@@ -90,3 +90,61 @@ body {
 .cart-summary button:hover {
     background-color: darkgreen;
 }
+
+/* Checkout Page Styles */
+.checkout-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.checkout-details {
+    width: 45%;
+}
+
+.checkout-summary {
+    width: 45%;
+    border: 1px solid #ddd;
+    padding: 20px;
+    border-radius: 8px;
+}
+
+.checkout-item {
+    margin-bottom: 10px;
+}
+
+.checkout-total {
+    margin-top: 20px;
+    font-size: 1.2em;
+}
+
+.checkout-details form {
+    display: flex;
+    flex-direction: column;
+}
+
+.checkout-details label {
+    margin: 10px 0 5px;
+}
+
+.checkout-details input,
+.checkout-details textarea {
+    padding: 10px;
+    margin-bottom: 15px;
+    width: 100%;
+    border-radius: 5px;
+    border: 1px solid #ddd;
+}
+
+.checkout-details button {
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.checkout-details button:hover {
+    background-color: darkgreen;
+}
