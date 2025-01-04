@@ -1,3 +1,4 @@
+/* Existing Styles */
 body {
     font-family: Arial, sans-serif;
     margin: 0;
@@ -17,4 +18,75 @@ body {
     color: white;
     text-decoration: none;
     border-radius: 5px;
+}
+
+/* Cart Page Styles */
+.cart-items {
+    display: flex;
+    flex-direction: column;
+    margin-top: 20px;
+}
+
+.cart-item {
+    display: flex;
+    align-items: center;
+    margin: 15px 0;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.cart-item img {
+    width: 100px;
+    height: auto;
+    margin-right: 20px;
+}
+
+.cart-item h2 {
+    margin: 0;
+    flex-grow: 1;
+}
+
+.cart-item .quantity {
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.cart-item .quantity button {
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.cart-item .quantity button:hover {
+    background-color: darkgreen;
+}
+
+.cart-item .quantity span {
+    margin: 0 10px;
+}
+
+.cart-summary {
+    margin-top: 20px;
+    display: flex;
+    justify-content: space-between;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+
+.cart-summary button {
+    background-color: green;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+.cart-summary button:hover {
+    background-color: darkgreen;
 }
