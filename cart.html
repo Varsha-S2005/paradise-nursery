@@ -1,1 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Paradise Nursery</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="index.html">Home</a>
+            <a href="products.html">Products</a>
+            <a href="cart.html">Cart (0)</a> <!-- This will dynamically update later -->
+        </nav>
+    </header>
+
+    <main>
+        <h1>Your Shopping Cart</h1>
+        <div class="cart-items">
+            <!-- Cart Item Example -->
+            <div class="cart-item">
+                <img src="images/product1.png" alt="Plant 1">
+                <h2>Plant Name 1</h2>
+                <p>$10.00</p>
+                <div class="quantity">
+                    <button>−</button>
+                    <span>1</span>
+                    <button>+</button>
+                </div>
+                <p>Total: $10.00</p>
+                <button>Remove</button>
+            </div>
+
+            <!-- More cart items will go here -->
+        </div>
+        <div class="cart-summary">
+            <p>Total Number of Items: 1</p>
+            <p>Total Cost: $10.00</p>
+            <button>Continue Shopping</button>
+            <button>Checkout</button>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2025 Paradise Nursery</p>
+    </footer>
+</body>
+</html>
 
