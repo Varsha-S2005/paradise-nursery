@@ -67,7 +67,7 @@ header nav a {
 }
 
 header nav a i {
-    font-size: 1.2em;
+    font-size: 1.5em; /* Ensures icons are visible */
 }
 
 header nav a:hover {
@@ -186,6 +186,7 @@ footer {
     bottom: 0;
     width: 100%;
 }
+
 header nav {
     background-color: rgba(0, 0, 0, 0.7); /* Semi-transparent black */
     color: white;
@@ -270,4 +271,3 @@ button {
 button:hover {
     background-color: #45a049; /* Slightly darker green */
 }
-
