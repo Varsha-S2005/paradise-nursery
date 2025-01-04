@@ -1,139 +1,116 @@
-// cart.js
-
-// Initialize cart if it doesn't already exist in local storage
-let cart = JSON.parse(localStorage.getItem('cart')) || [];
-
-// Function to update the cart icon and cart summary
-function updateCart() {
-    // Update cart icon count
-    const cartIcon = document.querySelector('header nav a[href="cart.html"]');
-    const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
-    cartIcon.textContent = `Cart (${totalItems})`;
-
-    // Update cart summary on the cart page
-    if (document.body.classList.contains('cart-page')) {
-        const cartContainer = document.querySelector('.cart-items');
-        const cartSummary = document.querySelector('.cart-summary');
-
-        cartContainer.innerHTML = ''; // Clear current cart items
-
-        let totalCost = 0;
-        cart.forEach(item => {
-            totalCost += item.quantity * item.price;
-
-            // Create cart item elements
-            const cartItem = document.createElement('div');
-            cartItem.classList.add('cart-item');
-            cartItem.innerHTML = `
-                <img src="${item.image}" alt="${item.name}">
-                <h2>${item.name}</h2>
-                <p>$${item.price}</p>
-                <div class="quantity">
-                    <button class="decrease">−</button>
-                    <span>${item.quantity}</span>
-                    <button class="increase">+</button>
-                </div>
-                <p>Total: $${item.quantity * item.price}</p>
-                <button class="remove">Remove</button>
-            `;
-
-            // Add event listeners for quantity change and removal
-            cartItem.querySelector('.increase').addEventListener('click', () => changeQuantity(item.name, 1));
-            cartItem.querySelector('.decrease').addEventListener('click', () => changeQuantity(item.name, -1));
-            cartItem.querySelector('.remove').addEventListener('click', () => removeItem(item.name));
-
-            cartContainer.appendChild(cartItem);
-        });
-
-        // Update total cost
-        cartSummary.querySelector('p:nth-child(1)').textContent = `Total Number of Items: ${totalItems}`;
-        cartSummary.querySelector('p:nth-child(2)').textContent = `Total Cost: $${totalCost.toFixed(2)}`;
-    }
+// Initialize cart array in localStorage (if it's not already there)
+if (!localStorage.getItem('cart')) {
+    localStorage.setItem('cart', JSON.stringify([]));
 }
 
-// Function to add an item to the cart
-function addToCart(name, price, image) {
-    const existingItem = cart.find(item => item.name === name);
-    if (existingItem) {
-        existingItem.quantity += 1;
+// Get the cart data
+function getCart() {
+    return JSON.parse(localStorage.getItem('cart'));
+}
+
+// Update cart in localStorage
+function updateCart(cart) {
+    localStorage.setItem('cart', JSON.stringify(cart));
+}
+
+// Add product to cart
+function addToCart(product) {
+    const cart = getCart();
+    const existingProductIndex = cart.findIndex(item => item.id === product.id);
+
+    if (existingProductIndex > -1) {
+        // Product already in the cart, increment quantity
+        cart[existingProductIndex].quantity += 1;
     } else {
-        cart.push({ name, price, image, quantity: 1 });
+        // Add new product to the cart
+        cart.push({ ...product, quantity: 1 });
     }
 
-    // Save cart to local storage and update cart
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCart();
+    updateCart(cart);
+    updateCartIcon();
 }
 
-// Function to change the quantity of an item in the cart
-function changeQuantity(name, delta) {
-    const item = cart.find(item => item.name === name);
-    if (item) {
-        item.quantity += delta;
-        if (item.quantity <= 0) {
-            removeItem(name); // If quantity goes to zero, remove item
-        } else {
-            localStorage.setItem('cart', JSON.stringify(cart));
-            updateCart();
-        }
+// Update cart icon with total item count
+function updateCartIcon() {
+    const cart = getCart();
+    const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+    document.querySelector('.cart-icon').textContent = `Cart (${totalItems})`;
+}
+
+// Remove item from cart
+function removeFromCart(productId) {
+    let cart = getCart();
+    cart = cart.filter(item => item.id !== productId);
+    updateCart(cart);
+    updateCartIcon();
+    renderCart();
+}
+
+// Increase quantity of an item in cart
+function increaseQuantity(productId) {
+    const cart = getCart();
+    const productIndex = cart.findIndex(item => item.id === productId);
+
+    if (productIndex > -1) {
+        cart[productIndex].quantity += 1;
     }
+
+    updateCart(cart);
+    renderCart();
+    updateCartIcon();
 }
 
-// Function to remove an item from the cart
-function removeItem(name) {
-    cart = cart.filter(item => item.name !== name);
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCart();
+// Decrease quantity of an item in cart
+function decreaseQuantity(productId) {
+    const cart = getCart();
+    const productIndex = cart.findIndex(item => item.id === productId);
+
+    if (productIndex > -1 && cart[productIndex].quantity > 1) {
+        cart[productIndex].quantity -= 1;
+    }
+
+    updateCart(cart);
+    renderCart();
+    updateCartIcon();
 }
-// Function to display cart items on the checkout page
-function displayCheckout() {
-    const checkoutItemsContainer = document.querySelector('.checkout-items');
-    const totalCostElement = document.getElementById('total-cost');
+
+// Render the cart on cart page
+function renderCart() {
+    const cart = getCart();
+    const cartContainer = document.querySelector('.cart-items');
+    const totalCostContainer = document.querySelector('.total-cost');
+
+    cartContainer.innerHTML = ''; // Clear existing cart items
     let totalCost = 0;
 
-    // Clear any existing items in the checkout container
-    checkoutItemsContainer.innerHTML = '';
-
     cart.forEach(item => {
-        totalCost += item.quantity * item.price;
+        totalCost += item.price * item.quantity;
 
-        // Create item elements for checkout summary
-        const checkoutItem = document.createElement('div');
-        checkoutItem.classList.add('checkout-item');
-        checkoutItem.innerHTML = `
-            <h3>${item.name}</h3>
-            <p>Quantity: ${item.quantity}</p>
-            <p>Price: $${item.price} each</p>
-            <p>Total: $${item.quantity * item.price}</p>
+        const cartItem = document.createElement('div');
+        cartItem.classList.add('cart-item');
+
+        cartItem.innerHTML = `
+            <img src="${item.image}" alt="${item.name}">
+            <div class="cart-item-details">
+                <h2>${item.name}</h2>
+                <p>$${item.price}</p>
+                <div class="quantity-controls">
+                    <button onclick="decreaseQuantity(${item.id})">-</button>
+                    <span>${item.quantity}</span>
+                    <button onclick="increaseQuantity(${item.id})">+</button>
+                </div>
+                <button onclick="removeFromCart(${item.id})">Remove</button>
+            </div>
         `;
 
-        checkoutItemsContainer.appendChild(checkoutItem);
+        cartContainer.appendChild(cartItem);
     });
 
-    totalCostElement.textContent = totalCost.toFixed(2);
+    totalCostContainer.textContent = `Total Cost: $${totalCost.toFixed(2)}`;
 }
 
-// Handle the form submission for checkout
-document.getElementById('checkout-form').addEventListener('submit', function(e) {
-    e.preventDefault();
-
-    // Simulate a successful order by clearing the cart
-    alert('Thank you for your order! Your purchase has been placed.');
-    localStorage.removeItem('cart');
-    cart = [];
-
-    // Redirect to the home page after checkout
-    window.location.href = 'index.html';
-});
-
-// Display cart items when the checkout page is loaded
-document.addEventListener('DOMContentLoaded', function() {
-    if (document.body.classList.contains('checkout-page')) {
-        displayCheckout();
-    }
-});
-
-// Call updateCart to initialize the cart when the page loads
+// Load initial cart data and update cart icon
 document.addEventListener('DOMContentLoaded', () => {
-    updateCart();
+    updateCartIcon();
+    renderCart();
 });
