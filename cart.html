@@ -12,33 +12,19 @@
         <nav>
             <a href="index.html"><i class="fas fa-home"></i> Home</a>
             <a href="products.html"><i class="fas fa-seedling"></i> Shop</a>
-            <a href="cart.html"><i class="fas fa-shopping-cart"></i> Cart (1)</a> <!-- Dynamically updated -->
+            <a href="cart.html"><i class="fas fa-shopping-cart"></i> Cart (0)</a> <!-- Dynamically updated -->
         </nav>
     </header>
 
     <main>
         <h1>Your Shopping Cart</h1>
         <div class="cart-items">
-            <!-- Cart Item Example -->
-            <div class="cart-item">
-                <img src="images/product1.png" alt="Sunflower">
-                <h2>Sunflower</h2>
-                <p>Price: $10.00</p>
-                <div class="quantity">
-                    <button class="decrement">−</button>
-                    <span class="quantity-value">1</span>
-                    <button class="increment">+</button>
-                </div>
-                <p>Total: $10.00</p>
-                <button class="remove">Remove</button>
-            </div>
-
-            <!-- Add more cart items dynamically -->
+            <!-- Cart items will be rendered dynamically here -->
         </div>
 
         <div class="cart-summary">
-            <p>Total Number of Items: <span id="total-items">1</span></p>
-            <p>Total Cost: $<span id="total-cost">10.00</span></p>
+            <p>Total Number of Items: <span id="total-items">0</span></p>
+            <p>Total Cost: $<span id="total-cost">0.00</span></p>
             <button class="continue-shopping" onclick="window.location.href='products.html'">Continue Shopping</button>
             <button class="checkout" onclick="checkout()">Checkout</button>
         </div>
@@ -49,52 +35,112 @@
     </footer>
 
     <script>
-        // Quantity control logic
-        document.querySelectorAll('.cart-item').forEach(item => {
-            const decrementButton = item.querySelector('.decrement');
-            const incrementButton = item.querySelector('.increment');
-            const quantityValue = item.querySelector('.quantity-value');
-            const totalElement = item.querySelector('p:nth-of-type(2)'); // Total price for this item
-            const removeButton = item.querySelector('.remove');
+        // Initialize cart array in localStorage (if it's not already there)
+        if (!localStorage.getItem('cart')) {
+            localStorage.setItem('cart', JSON.stringify([]));
+        }
 
-            const pricePerItem = 10; // Set the price per item dynamically or fetch it
+        // Get the cart data from localStorage
+        function getCart() {
+            return JSON.parse(localStorage.getItem('cart'));
+        }
+
+        // Update cart in localStorage
+        function updateCart(cart) {
+            localStorage.setItem('cart', JSON.stringify(cart));
+        }
+
+        // Update cart icon with total item count
+        function updateCartIcon() {
+            const cart = getCart();
+            const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
+            document.querySelector('.cart-icon').textContent = `Cart (${totalItems})`;
+        }
+
+        // Render the cart on cart page
+        function renderCart() {
+            const cart = getCart();
+            const cartContainer = document.querySelector('.cart-items');
             const totalItemsElement = document.getElementById('total-items');
             const totalCostElement = document.getElementById('total-cost');
+            let totalCost = 0;
 
-            function updateCartSummary() {
-                const totalItems = Array.from(document.querySelectorAll('.cart-item .quantity-value'))
-                    .map(qty => parseInt(qty.textContent))
-                    .reduce((acc, curr) => acc + curr, 0);
-                const totalCost = totalItems * pricePerItem;
-                totalItemsElement.textContent = totalItems;
-                totalCostElement.textContent = totalCost.toFixed(2);
+            // Clear the existing cart items
+            cartContainer.innerHTML = '';
+
+            cart.forEach(item => {
+                totalCost += item.price * item.quantity;
+
+                // Create the cart item element
+                const cartItem = document.createElement('div');
+                cartItem.classList.add('cart-item');
+                cartItem.innerHTML = `
+                    <img src="${item.image}" alt="${item.name}">
+                    <div class="cart-item-details">
+                        <h2>${item.name}</h2>
+                        <p>Price: $${item.price}</p>
+                        <div class="quantity-controls">
+                            <button onclick="decreaseQuantity(${item.id})">−</button>
+                            <span class="quantity-value">${item.quantity}</span>
+                            <button onclick="increaseQuantity(${item.id})">+</button>
+                        </div>
+                        <p>Total: $${(item.price * item.quantity).toFixed(2)}</p>
+                        <button onclick="removeFromCart(${item.id})">Remove</button>
+                    </div>
+                `;
+
+                cartContainer.appendChild(cartItem);
+            });
+
+            totalItemsElement.textContent = cart.reduce((acc, item) => acc + item.quantity, 0);
+            totalCostElement.textContent = totalCost.toFixed(2);
+        }
+
+        // Increase quantity of an item in cart
+        function increaseQuantity(productId) {
+            const cart = getCart();
+            const productIndex = cart.findIndex(item => item.id === productId);
+
+            if (productIndex > -1) {
+                cart[productIndex].quantity += 1;
+                updateCart(cart);
+                renderCart();
+                updateCartIcon();
             }
+        }
 
-            incrementButton.addEventListener('click', () => {
-                const currentQty = parseInt(quantityValue.textContent);
-                quantityValue.textContent = currentQty + 1;
-                totalElement.textContent = `Total: $${((currentQty + 1) * pricePerItem).toFixed(2)}`;
-                updateCartSummary();
-            });
+        // Decrease quantity of an item in cart
+        function decreaseQuantity(productId) {
+            const cart = getCart();
+            const productIndex = cart.findIndex(item => item.id === productId);
 
-            decrementButton.addEventListener('click', () => {
-                const currentQty = parseInt(quantityValue.textContent);
-                if (currentQty > 1) {
-                    quantityValue.textContent = currentQty - 1;
-                    totalElement.textContent = `Total: $${((currentQty - 1) * pricePerItem).toFixed(2)}`;
-                    updateCartSummary();
-                }
-            });
+            if (productIndex > -1 && cart[productIndex].quantity > 1) {
+                cart[productIndex].quantity -= 1;
+                updateCart(cart);
+                renderCart();
+                updateCartIcon();
+            }
+        }
 
-            removeButton.addEventListener('click', () => {
-                item.remove();
-                updateCartSummary();
-            });
-        });
+        // Remove item from cart
+        function removeFromCart(productId) {
+            let cart = getCart();
+            cart = cart.filter(item => item.id !== productId);
+            updateCart(cart);
+            renderCart();
+            updateCartIcon();
+        }
 
+        // Checkout function
         function checkout() {
             alert('Proceeding to checkout!');
         }
+
+        // Load initial cart data and render it
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCart();
+            updateCartIcon();
+        });
     </script>
 </body>
 </html>
